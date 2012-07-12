@@ -27,7 +27,7 @@ typedef struct {
 	unsigned int		layers;
 	unsigned int		teleporters;
 	unsigned int		spawn_points;
-	unsigned int		action_trigs;
+	unsigned int		triggers;
 } MAP_FILE_HEADER;
 
 
@@ -63,7 +63,7 @@ typedef struct {
 
 
 typedef struct {
-	DARNIT_TILEMAP		*layer[MAP_MAX_LAYERS];
+	DARNIT_TILEMAP		**layer;
 	void			*tilesheet;
 	int			layers;
 	int			w;
