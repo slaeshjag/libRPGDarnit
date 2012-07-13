@@ -4,19 +4,23 @@
 #define				MAP_MASK_USE		0xFFFF
 #define				MAP_FILE_MAGIC		0xA4D5400
 
-#define				MAP_BLOCK_LEFT		0x10000
+#define				MAP_BLOCK_LEFT		0x80000
 #define				MAP_BLOCK_RIGHT		0x20000
-#define				MAP_BLOCK_TOP		0x40000
-#define				MAP_BLOCK_DOWN		0x80000
-#define				MAP_PROP_TELEPORTER	0x100000
-#define				MAP_PROP_RNDENC		0x200000
-#define				MAP_PROP_ACTION		0x400000
+#define				MAP_BLOCK_TOP		0x10000
+#define				MAP_BLOCK_DOWN		0x40000
+#define				MAP_PROP_SLIPPERY	0x100000
+#define				MAP_PROP_THICK		0x200000
+#define				MAP_PROP_POISON		0x400000
+#define				MAP_PROP_TELEPORTER	0x10000000
+#define				MAP_PROP_RNDENC		0x20000000
+#define				MAP_PROP_ACTION		0x40000000
 
 
 
 typedef struct {
 	unsigned int		magic;
 	const char		internal_name[16];
+	const char		music[32];
 	const char		full_name[64];
 	const char		tilesheet_file[32];
 	const char		logic_lib[32];

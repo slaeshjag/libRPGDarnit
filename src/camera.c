@@ -105,7 +105,7 @@ void cameraSet(void *handle, int x, int y) {
 
 int cameraLoop(void *handle) {
 	MAIN *m = handle;
-	int tx, ty, xd, yd, nt, tp;
+	int tx, ty, xd, yd, tp;
 	float angle, xt, yt;
 
 	tx = ty = 0;

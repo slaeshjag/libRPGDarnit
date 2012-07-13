@@ -9,12 +9,15 @@
 
 #include "map.h"
 #include "camera.h"
+#include "coll.h"
+#include "npc.h"
 
 typedef struct {
 	void		*darnit;
 
 	CAMERA		cam;
 	MAP		map;
+	NPC		npc;
 } MAIN;
 
 
