@@ -6,7 +6,9 @@ BINARY = bin/ocrpgewawa
 
 default:
 	mkdir -p bin
-	cd src && make
+	cd engine && make
+	cd launcher && make
+	cd npc_lib && make
 #	$(CC) $(CFLAGS) $(SRC) -o $(BINARY) $(LIBS)
 #	cd tools && make
 #	cd res && make
@@ -17,4 +19,6 @@ clean:
 	rm -Rf bin
 #	cd tools && make clean
 #	cd res && make clean
-	cd src && make clean
+	cd engine && make clean
+	cd launcher && make clean
+	cd npc_lib && make clean
