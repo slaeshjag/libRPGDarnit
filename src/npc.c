@@ -2,6 +2,17 @@
 
 
 
+void npcDrawLayer(void *handle, int layer) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->npc.npcs; i++)
+		if (m->npc.sort[i].npc >= 0 && m->npc.sort[i].layer == layer)
+			darnitSpriteDraw(m->npc.npc[m->npc.sort[i].npc].sprite);
+	return;
+}
+
+
 void npcReSort(void *handle) {
 	MAIN *m = handle;
 	NPC_SORT tmp;
@@ -72,7 +83,7 @@ int npcLimitSet(void *handle, unsigned int limit) {
 
 	if ((m->npc.npc = realloc(m->npc.npc, sizeof(NPC_ENTRY) * limit)) == NULL)
 		m->npc.npcs = 0;
-	if ((m->npc.reservation_list = realloc(m->npc.npc, sizeof(unsigned int) * m->npc.npcs * 4)) == NULL)
+	if ((m->npc.reservation_list = realloc(m->npc.reservation_list, sizeof(unsigned int) * m->npc.npcs * 4)) == NULL)
 		m->npc.npcs = 0;
 	if ((m->npc.sort = realloc(m->npc.sort, sizeof(NPC_SORT) * limit)) == NULL)
 		m->npc.npcs = 0;
@@ -83,16 +94,14 @@ int npcLimitSet(void *handle, unsigned int limit) {
 }
 
 
-int npcInit(void *handle, unsigned int prealloc) {
+int npcInit(void *handle) {
 	MAIN *m = handle;
 	int i;
 
 	m->npc.npcs = 0;
 	m->npc.npc = NULL;
+	m->npc.reservation_list = NULL;
 	m->npc.sort = NULL;
-
-	for (i = 0; i < m->npc.npcs; i++)
-		m->npc.npc[i].used = 0;
 
 	m->npc.codelib = NULL;
 	m->npc.npcSaveData = NULL;
@@ -174,7 +183,12 @@ int npcSpawn(void *handle, int x, int y, int l, const char *sprite, const char *
 	m->npc.npc[npc].activated = 0;
 	m->npc.npc[npc].inv_activated = 0;
 	m->npc.npc[npc].textbox_ack = 0;
-	m->npc.npc[npc].npcHandler = darnitDynlibGet(m->npc.codelib, logic_func);
+	if ((m->npc.npc[npc].npcHandler = darnitDynlibGet(m->npc.codelib, logic_func)) == NULL) {
+		fprintf(stderr, "Fatal error: Unable to get symbol %s\n", logic_func);
+		darnitSpriteDelete(m, m->npc.npc[npc].sprite);
+		m->npc.npc[npc].used = 0;
+		return -1;
+	}
 	(m->npc.npc[npc].npcHandler)(m, npc);
 
 	npcAddSort(m, npc);

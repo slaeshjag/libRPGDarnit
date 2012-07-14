@@ -34,8 +34,6 @@ typedef struct {
 	unsigned int		dir;
 	unsigned int		used;
 	unsigned int		activated;
-//	unsigned int		time1;
-//	unsigned int		time2;
 	unsigned int		move_mode;
 	unsigned int		inv_activated;
 	float			mx;
@@ -48,8 +46,6 @@ typedef struct {
 	unsigned int		(*npcHandler)(void *handle, unsigned int npc);
 
 	void			*sprite;
-//	float			ma;
-//	float			mb;
 } NPC_ENTRY;
 
 
@@ -67,8 +63,9 @@ typedef struct {
 } NPC;
 
 
+void npcDrawLayer(void *handle, int layer);
 int npcLimitSet(void *handle, unsigned int limit);
-int npcInit(void *handle, unsigned int prealloc);
+int npcInit(void *handle);
 int npcGetOne(void *handle);
 int npcSpawn(void *handle, int x, int y, int layer, const char *sprite, const char *logic_func);
 void npcLoop(void *handle);

@@ -51,6 +51,7 @@ typedef struct {
 	unsigned int		spawn_x;
 	unsigned int		spawn_y;
 	unsigned int		spawn_layer;
+	unsigned int		dir;
 
 	const char		sprite_file[64];
 	const char		logic_func[16];
@@ -79,6 +80,13 @@ typedef struct {
 	MAP_FILE_TRIGGER	*trigger;
 	unsigned int		triggers;
 } MAP;
+
+
+int mapInit(void *handle);
+int mapDrawLayer(void *handle, int layer);
+int mapUnload(void *handle);
+int mapLoad(void *handle, const char *fname);
+
 
 
 #endif

@@ -7,6 +7,7 @@ int mapInit(void *handle) {
 	m->map.tilesheet = NULL;
 	m->map.teleporter = NULL;
 	m->map.trigger = NULL;
+	m->map.layer = NULL;
 
 	return 0;
 }
@@ -84,18 +85,39 @@ int mapLoad(void *handle, const char *fname) {
 	m->map.tile_h = mfh->tile_h;
 	m->map.layer = malloc(sizeof(DARNIT_TILEMAP *) * m->map.layers);
 
-	if ((m->map.tilesheet = darnitRenderTilesheetLoad(m->darnit, mfh->tilesheet_file, mfh->tile_w, mfh->tile_h, DARNIT_TILESHEET_FORMAT_RGBA)) == NULL) {
+	if ((m->map.teleporter = malloc(sizeof(MAP_FILE_TELEPORTER) * m->map.teleporters)) == NULL) {
+		m->map.layers = 0;
+		fclose(fp);
+		free(m->map.layer);
+		return -1;
+	}
+
+	if ((m->map.trigger = malloc(sizeof(MAP_FILE_TRIGGER) * m->map.triggers)) == NULL) {
+		m->map.layers = 0;
+		fclose(fp);
+		free(m->map.layer);
+		free(m->map.teleporter);
+		return -1;
+	}
+
+	npcLimitSet(m, mfh->spawn_points);
+
+	if ((m->map.tilesheet = darnitRenderTilesheetLoad(m->darnit, mfh->tilesheet_file, mfh->tile_w, mfh->tile_h, DARNIT_PFORMAT_RGBA8)) == NULL) {
 		fclose(fp);
 		fprintf(stderr, "Unable to open tilesheet '%s' for map '%s'\n", mfh->tilesheet_file, fname);
 		return -1;
 	}
 
+	fprintf(stderr, "Starting to read tile data at %i\n", (unsigned int) ftell(fp));
+
 	for (i = 0; i < m->map.layers; i++) {
-		m->map.layer[i] = darnitRenderTilemapNew(m->darnit, 0x1000, m->map.tilesheet, MAP_MASK_USE, m->map.w, m->map.h);
-		for (j = 0; j < m->map.w; j++)
-			for (k = 0; k < m->map.h; j++) {
+		if ((m->map.layer[i] = darnitRenderTilemapNew(m->darnit, 0x1000, m->map.tilesheet, MAP_MASK_USE, m->map.w, m->map.h)) == NULL)
+			fprintf(stderr, "WARNING: Loading layer %i failed\n", i);
+		for (j = 0; j < m->map.h; j++)
+			for (k = 0; k < m->map.w; k++) {
+				t = 0;
 				fread(&t, 4, 1, fp);
-				darnitRenderTilemapTileSet(m->map.layer[i], j, k, t);
+				darnitRenderTilemapTileSet(m->map.layer[i], k, j, t);
 			}
 	}
 	
