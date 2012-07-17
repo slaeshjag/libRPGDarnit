@@ -69,20 +69,20 @@ int mapLoad(void *handle, const char *fname) {
 		return -1;
 	}
 
-	if (mfh->magic != MAP_FILE_MAGIC) {
+	if (darnitUtilNtohl(mfh->magic) != MAP_FILE_MAGIC) {
 		fprintf(stderr, "Map file '%s' is not a valid CTMB file\n", fname);
 		free(mfh);
 		fclose(fp);
 		return -1;
 	}
 
-	m->map.teleporters = mfh->teleporters;
-	m->map.triggers = mfh->triggers;
-	m->map.layers = mfh->layers;
-	m->map.w = mfh->w;
-	m->map.h = mfh->h;
-	m->map.tile_w = mfh->tile_w;
-	m->map.tile_h = mfh->tile_h;
+	m->map.teleporters = darnitUtilNtohl(mfh->teleporters);
+	m->map.triggers = darnitUtilNtohl(mfh->triggers);
+	m->map.layers = darnitUtilNtohl(mfh->layers);
+	m->map.w = darnitUtilNtohl(mfh->w);
+	m->map.h = darnitUtilNtohl(mfh->h);
+	m->map.tile_w = darnitUtilNtohl(mfh->tile_w);
+	m->map.tile_h = darnitUtilNtohl(mfh->tile_h);
 	m->map.layer = malloc(sizeof(DARNIT_TILEMAP *) * m->map.layers);
 
 	if ((m->map.teleporter = malloc(sizeof(MAP_FILE_TELEPORTER) * m->map.teleporters)) == NULL) {
@@ -100,10 +100,10 @@ int mapLoad(void *handle, const char *fname) {
 		return -1;
 	}
 
-	npcLimitSet(m, mfh->spawn_points);
+	npcLimitSet(m, darnitUtilNtohl(mfh->spawn_points));
 	npcLoadCode(m, mfh->logic_lib);
 
-	if ((m->map.tilesheet = darnitRenderTilesheetLoad(m->darnit, mfh->tilesheet_file, mfh->tile_w, mfh->tile_h, DARNIT_PFORMAT_RGBA8)) == NULL) {
+	if ((m->map.tilesheet = darnitRenderTilesheetLoad(m->darnit, mfh->tilesheet_file, m->map.tile_w, m->map.tile_h, DARNIT_PFORMAT_RGBA8)) == NULL) {
 		fclose(fp);
 		fprintf(stderr, "Unable to open tilesheet '%s' for map '%s'\n", mfh->tilesheet_file, fname);
 		return -1;
@@ -116,18 +116,33 @@ int mapLoad(void *handle, const char *fname) {
 			for (k = 0; k < m->map.w; k++) {
 				t = 0;
 				fread(&t, 4, 1, fp);
-				darnitRenderTilemapTileSet(m->map.layer[i], k, j, t);
+				darnitRenderTilemapTileSet(m->map.layer[i], k, j, darnitUtilNtohl(t));
 			}
 	}
 	
 	fread(m->map.teleporter, sizeof(MAP_FILE_TELEPORTER) * m->map.teleporters, 1, fp);
+
+	for (i = 0; i < m->map.teleporters; i++) {
+		m->map.teleporter[i].target_x = darnitUtilNtohl(m->map.teleporter[i].target_x);
+		m->map.teleporter[i].target_y = darnitUtilNtohl(m->map.teleporter[i].target_y);
+		m->map.teleporter[i].target_layer = darnitUtilNtohl(m->map.teleporter[i].target_layer);
+		m->map.teleporter[i].source_x = darnitUtilNtohl(m->map.teleporter[i].source_x);
+		m->map.teleporter[i].source_y = darnitUtilNtohl(m->map.teleporter[i].source_y);
+		m->map.teleporter[i].source_layer = darnitUtilNtohl(m->map.teleporter[i].source_layer);
+	}
 	
-	for (i = 0; i < mfh->spawn_points; i++) {
+	for (i = 0; i < darnitUtilNtohl(mfh->spawn_points); i++) {
 		fread(&npc, sizeof(MAP_FILE_NPC), 1, fp);
-		npcSpawn(m, npc.spawn_x, npc.spawn_y, npc.spawn_layer, npc.dir, npc.sprite_file, npc.logic_func);
+		npcSpawn(m, darnitUtilNtohl(npc.spawn_x), darnitUtilNtohl(npc.spawn_y), darnitUtilNtohl(npc.spawn_layer), darnitUtilNtohl(npc.dir), npc.sprite_file, npc.logic_func);
 	}
 
 	fread(m->map.trigger, sizeof(MAP_FILE_TRIGGER) * m->map.triggers, 1, fp);
+	
+	for (i = 0; i < m->map.triggers; i++) {
+		m->map.trigger[i].x = darnitUtilNtohl(m->map.trigger[i].x);
+		m->map.trigger[i].y = darnitUtilNtohl(m->map.trigger[i].y);
+		m->map.trigger[i].layer = darnitUtilNtohl(m->map.trigger[i].layer);
+	}
 
 	free(mfh);
 	fclose(fp);

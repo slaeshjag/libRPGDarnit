@@ -9,6 +9,7 @@ default:
 	cd engine && make
 	cd launcher && make
 	cd npc_lib && make
+	cd res && make
 #	$(CC) $(CFLAGS) $(SRC) -o $(BINARY) $(LIBS)
 #	cd tools && make
 #	cd res && make
@@ -22,3 +23,4 @@ clean:
 	cd engine && make clean
 	cd launcher && make clean
 	cd npc_lib && make clean
+	cd res && make clean
