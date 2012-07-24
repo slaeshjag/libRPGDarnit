@@ -25,7 +25,7 @@ int systemInit(void *handle) {
 	m->system.box_selection_text_pad = atoi(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_TEXT_PAD"));
 	m->system.box_selection_scroll = atoi(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_SCROLL"));
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_RED"), "%f", &m->system.box_selection_r);
-	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_GREED"), "%f", &m->system.box_selection_g);
+	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_GREEN"), "%f", &m->system.box_selection_g);
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_BLUE"), "%f", &m->system.box_selection_b);
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_ALPHA"), "%f", &m->system.box_selection_a);
 
@@ -38,11 +38,33 @@ int systemInit(void *handle) {
 		return -1;
 	}
 
+	m->system.item_w = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_W"));
+	m->system.item_h = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_H"));
+	
+	if ((m->item.ts_icon = darnitRenderTilesheetLoad(m->darnit, darnitStringtableEntryGet(stringtable, "ITEM_ICON_TILESET"), 
+		m->system.item_w, m->system.item_h, DARNIT_TILESHEET_FORMAT_RGBA)) == NULL) {
+			fprintf(stderr, "Unable to load item icons from %s\n", darnitStringtableEntryGet(stringtable, "ITEM_ICON_TILESET"));
+			return -1;
+	}
+
 	if ((m->system.std_font = darnitFontLoad(m->darnit, darnitStringtableEntryGet(stringtable, "UI_FONT"), m->system.font_height, 512, 512)) == NULL) {
 		fprintf(stderr, "Unable to load font %s\n", darnitStringtableEntryGet(stringtable, "UI_FONT"));
 		return -1;
 	}
 
-	return 0;
+	m->system.inventory_size = atoi(darnitStringtableEntryGet(stringtable, "INVENTORY_SIZE"));
+	m->system.magic_cap = atoi(darnitStringtableEntryGet(stringtable, "ABILITY_CAP"));
+	m->system.party_cap = atoi(darnitStringtableEntryGet(stringtable, "PARTY_CAP"));
+
+	if (itemInit(m, darnitStringtableEntryGet(stringtable, "ITEM_DB")) != 0);
+	else if (partyInit(m, darnitStringtableEntryGet(stringtable, "PARTY_DB")) != 0);
+	else {
+		darnitStringtableClose(stringtable);
+		return 0;
+	}
+
+	darnitStringtableClose(stringtable);
+	return -1;
+
 }
 

@@ -116,8 +116,9 @@ int mapLoad(void *handle, const char *fname) {
 			for (k = 0; k < m->map.w; k++) {
 				t = 0;
 				fread(&t, 4, 1, fp);
-				darnitRenderTilemapTileSet(m->map.layer[i], k, j, darnitUtilNtohl(t));
+				m->map.layer[i]->data[j * m->map.w + k] = darnitUtilNtohl(t);
 			}
+		darnitRenderTilemapRecalculate(m->map.layer[i]);
 	}
 	
 	fread(m->map.teleporter, sizeof(MAP_FILE_TELEPORTER) * m->map.teleporters, 1, fp);

@@ -30,6 +30,13 @@ typedef struct {
 	void			*std_font;
 	int			font_height;
 	void			*ts_ui_elements;
+
+	int			item_w;
+	int			item_h;
+
+	int			inventory_size;
+	int			magic_cap;
+	int			party_cap;
 } SYSTEM;
 
 

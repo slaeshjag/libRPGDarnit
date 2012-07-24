@@ -8,13 +8,15 @@
 
 #include <darnit/darnit.h>
 
+
 #include "map.h"
 #include "camera.h"
 #include "coll.h"
 #include "npc.h"
 #include "system.h"
 #include "textbox.h"
-
+#include "item.h"
+#include "party.h"
 
 typedef struct {
 	DARNIT_KEYS	buttons;
@@ -27,6 +29,8 @@ typedef struct {
 	CAMERA		cam;
 	MAP		map;
 	NPC		npc;
+	PARTY		party;
+	ITEM		item;
 	TEXT_BOX	box;
 
 	SYSTEM		system;

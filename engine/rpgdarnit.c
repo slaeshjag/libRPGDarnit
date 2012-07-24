@@ -57,7 +57,7 @@ int rpg_main() {
 		return -1;
 
 	mapLoad(m, "res/test.ctmb");
-	textboxActivate(m, "123456789012345678901234567890123456789012345678901234567890", -1, 0, 0, NULL, NULL);
+	textboxActivate(m, "123456789012345678901234567890123456789012345678901234567890", -1, 0, 0, NULL, "Yes\nNo\nMaybe");
 	darnitRenderBlendingEnable(m->darnit);
 	cameraFollowNPC(m, 0);
 

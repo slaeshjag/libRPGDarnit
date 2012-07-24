@@ -10,7 +10,7 @@
 #define		TEXTBOX_SELECT_Y		(TEXTBOX_TILE_Y - m->system.box_selection_h * m->system.tile_h)
 #define		TEXTBOX_MENU_X			(TEXTBOX_SELECT_X + m->system.textbox_pad_h)
 #define		TEXTBOX_MENU_Y			(TEXTBOX_SELECT_Y + m->system.textbox_pad_v)
-#define		TEXTBOX_MENU_W			(m->system.box_selection_w * m->system.tile_w - TEXTBOX_MENU_X - m->system.textbox_pad_v)
+#define		TEXTBOX_MENU_W			(m->system.box_selection_w * m->system.tile_w - 2*m->system.textbox_pad_h)
 
 
 int textboxDecideTile(int w, int h, int x, int y, int border_bottom) {
@@ -88,7 +88,7 @@ int textboxInit(void *handle) {
 	}
 
 	for (j = k = 0; j < m->system.box_selection_h; j++) {
-		for (i = 0; i < m->system.box_selection_w; i++) {
+		for (i = 0; i < m->system.box_selection_w; i++, k++) {
 			h = textboxDecideTile(m->system.box_selection_w, m->system.box_selection_h, i, j, 0);
 			darnitRenderTileMove(m->box.menu_tile, k, m->system.ts_ui_elements, i * m->system.tile_w + TEXTBOX_SELECT_X, j * m->system.tile_h + TEXTBOX_SELECT_Y);
 			darnitRenderTileSet(m->box.menu_tile, k, m->system.ts_ui_elements, h);
@@ -120,7 +120,7 @@ int textboxActivate(void *handle, const char *str, int npcCallback, int scroll, 
 	m->box.face_ts = face_ts;
 
 	if (q_str != NULL) {
-		darnitMenuVerticalCreate(m->darnit, q_str, TEXTBOX_MENU_X, TEXTBOX_MENU_Y, m->system.std_font, TEXTBOX_MENU_W, m->system.box_selection_text_pad, m->system.box_selection_scroll);
+		m->box.menu = darnitMenuVerticalCreate(m->darnit, q_str, TEXTBOX_MENU_X, TEXTBOX_MENU_Y, m->system.std_font, TEXTBOX_MENU_W, m->system.box_selection_text_pad, 3);
 		darnitMenuShadeColorSet(m->box.menu, m->system.box_selection_r, m->system.box_selection_g, m->system.box_selection_b, m->system.box_selection_a);
 	}
 
@@ -136,8 +136,9 @@ int textboxActivate(void *handle, const char *str, int npcCallback, int scroll, 
 void textboxClose(void *handle) {
 	MAIN *m = handle;
 
-	fprintf(stderr, "Closing textbox...\n");
 	m->box.visible = 0;
+	if (m->box.menu != NULL)
+		m->box.menu = darnitMenuDestroy(m->box.menu);
 	if (m->box.npcCallback > -1) 
 		(m->npc.npc[m->box.npcCallback].npcHandler)(m, m->box.npcCallback);
 	return;
