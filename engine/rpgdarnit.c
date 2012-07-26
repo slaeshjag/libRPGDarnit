@@ -67,6 +67,7 @@ int rpg_main() {
 		cameraLoop(m);
 
 		darnitRenderBegin();
+		darnitRenderBlendingEnable(m->darnit);
 		draw(m);
 		darnitRenderEnd();
 		darnitLoop(m->darnit);

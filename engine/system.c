@@ -33,7 +33,7 @@ int systemInit(void *handle) {
 	m->system.face_h = atoi(darnitStringtableEntryGet(stringtable, "FACE_H"));
 	m->system.font_height = atoi(darnitStringtableEntryGet(stringtable, "FONT_HEIGHT"));
 
-	if ((m->system.ts_ui_elements = darnitRenderTilesheetLoad(m->darnit, darnitStringtableEntryGet(stringtable, "UI_TILESET"), m->system.tile_w, m->system.tile_h, DARNIT_TILESHEET_FORMAT_RGBA)) == NULL) {
+	if ((m->system.ts_ui_elements = darnitRenderTilesheetLoad(m->darnit, darnitStringtableEntryGet(stringtable, "UI_TILESET"), m->system.tile_w, m->system.tile_h, DARNIT_PFORMAT_RGB5A1)) == NULL) {
 		fprintf(stderr, "Unable to load UI elements from %s\n", darnitStringtableEntryGet(stringtable, "UI_TILESET"));
 		return -1;
 	}
@@ -42,7 +42,7 @@ int systemInit(void *handle) {
 	m->system.item_h = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_H"));
 	
 	if ((m->item.ts_icon = darnitRenderTilesheetLoad(m->darnit, darnitStringtableEntryGet(stringtable, "ITEM_ICON_TILESET"), 
-		m->system.item_w, m->system.item_h, DARNIT_TILESHEET_FORMAT_RGBA)) == NULL) {
+		m->system.item_w, m->system.item_h, DARNIT_PFORMAT_RGB5A1)) == NULL) {
 			fprintf(stderr, "Unable to load item icons from %s\n", darnitStringtableEntryGet(stringtable, "ITEM_ICON_TILESET"));
 			return -1;
 	}

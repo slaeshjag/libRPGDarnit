@@ -11,6 +11,18 @@ typedef struct {
 
 
 typedef struct {
+	int			att;
+	int			def;
+	int			speca;
+	int			specd;
+	int			speed;
+	int			hp;
+	int			mp;
+	int			error;
+} MEMBER_STATS_DIFF;
+
+
+typedef struct {
 	char			name[16];
 	int			ai;
 	int			base_HP;

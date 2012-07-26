@@ -100,4 +100,241 @@ int partyInit(void *handle, const char *fname) {
 	darnitStringtableClose(st);
 	return 0;
 }
+
+
+int partyMemberHasThisAbility(void *handle, PARTY_ENTRY *member, int ability) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->system.party_cap; i++)
+		if (member->magic[i] == ability)
+			return 0;
+	return -1;
+}
+
+
+void partyMemberAddAbility(void *handle, PARTY_ENTRY *member, int ability) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->system.party_cap; i++)
+		if (member->magic[i] == -1) {
+			member->magic[i] = ability;
+			return;
+		}
+	return;
+}
+
+
+MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int itemrep) {
+	MAIN *m = handle;
+	float p;
+	int id, item, i, test, repnottried = 0;
+	int att, def, speca, specd, speed;
+	MEMBER_STATS_DIFF diff;
+
+	id = member->id;
+
+	if (member->att_exp > m->party.skel[id].per_att)
+		member->att_exp = m->party.skel[id].per_att;
+	if (member->def_exp > m->party.skel[id].per_def)
+		member->def_exp = m->party.skel[id].per_def;
+	if (member->speca_exp > m->party.skel[id].per_speca)
+		member->speca_exp = m->party.skel[id].per_speca;
+	if (member->specd_exp > m->party.skel[id].per_specd)
+		member->specd_exp = m->party.skel[id].per_specd;
+	if (member->speed_exp > m->party.skel[id].per_speed)
+		member->speed_exp = m->party.skel[id].per_speed;
+	
+	p = M_PI_2 * member->att_exp;
+	p /= m->party.skel[id].per_att;
+	diff.att = m->party.skel[id].amp_att * sinf(p);
+	diff.att += m->party.skel[id].base_att;
+
+	p = M_PI_2 * member->def_exp;
+	p /= m->party.skel[id].per_def;
+	diff.def = m->party.skel[id].amp_def * sinf(p);
+	diff.def += m->party.skel[id].base_def;
+
+	p = M_PI_2 * member->speca_exp;
+	p /= m->party.skel[id].per_speca;
+	diff.speca = m->party.skel[id].amp_speca * sinf(p);
+	diff.speca += m->party.skel[id].base_speca;
+
+	p = M_PI_2 * member->specd_exp;
+	p /= m->party.skel[id].per_specd;
+	diff.specd = m->party.skel[id].amp_specd * sinf(p);
+	diff.specd += m->party.skel[id].base_specd;
+
+	p = M_PI_2 * member->speed_exp;
+	p /= m->party.skel[id].per_speed;
+	diff.speed = m->party.skel[id].amp_speed * sinf(p);
+	diff.speed += m->party.skel[id].base_speed;
+
+	p = M_PI_2 * (member->def_exp + member->specd_exp + member->speed_exp) / 3;
+	p /= m->party.skel[id].per_HP;
+	diff.hp = m->party.skel[id].amp_HP * sinf(p);
+	diff.hp += m->party.skel[id].base_HP;
+
+	p = M_PI_2 * (member->speca_exp + member->specd_exp + member->speed_exp) / 3;
+	p /= m->party.skel[id].per_MP;
+	diff.mp = m->party.skel[id].amp_MP * sinf(p);
+	diff.mp += m->party.skel[id].base_MP;
+
+	if (member->needs_init == 0)
+		partyMemberLearnAbilities(m, member);
+	
+	if (itemrep != -1) {
+		item = itemrep;
+		/* TODO: Here, we need to check if the item can be equipped */
+	} else
+		item = -1;
+	
+	att = def = speca = specd = speed = 0;
+
+	for (i = 0; i < m->system.inventory_size; i++) {
+		test = i;
+		if (member->inventory[i].equipped != -1)
+			continue;
+		if (item != -1);	/* TODO: Check if an item of the same type is already equipped and set test accordingly */
 		
+		att += m->item.item[test].attboost * diff.att;
+		def += m->item.item[test].defboost * diff.def;
+		speca += m->item.item[test].specaboost * diff.speca;
+		specd += m->item.item[test].specdboost * diff.specd;
+		speed += m->item.item[test].speedboost * diff.speed;
+	}
+
+	if (repnottried == 0 && item != -1) {
+		test = item;
+		att += m->item.item[test].attboost * diff.att;
+		def += m->item.item[test].defboost * diff.def;
+		speca += m->item.item[test].specaboost * diff.speca;
+		specd += m->item.item[test].specdboost * diff.specd;
+		speed += m->item.item[test].speedboost * diff.speed;
+	}
+
+	diff.att += att, diff.def += def, diff.speca += speca, diff.specd += specd, diff.speed += speed;
+
+	return diff;
+}
+
+
+void partyMemberRecalculateStats(void *handle, PARTY_ENTRY *member) {
+	MAIN *m = handle;
+	MEMBER_STATS_DIFF diff;
+	diff = partyMemberCalcStats(m, member, -1);
+
+	member->hp_max = diff.hp;
+	member->mp_max = diff.mp;
+	member->att = diff.att;
+	member->def = diff.def;
+	member->speca = diff.speca;
+	member->specd = diff.specd;
+	member->speed = diff.speed;
+
+	return;
+}
+
+
+void partyRecalculateStats(void *handle, PARTY_ENTRY *party) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->system.party_cap; i++)
+		if (party[i].id != -1)
+			partyMemberRecalculateStats(m, &party[i]);
+	
+	return;
+}
+
+
+int partyAddMember(void *handle, PARTY_ENTRY *party, int id, int exp) {
+	MAIN *m = handle;
+	int i, j;
+
+	for (i = 0; i < m->system.party_cap; i++)
+		if (party[i].id == -1)
+			break;
+	if (i == m->system.party_cap)
+		return -1;
+	for (j = 0; j < m->system.inventory_size; j++)
+		party[i].magic[j] = -1;
+	
+	party[i].id = id;	
+	party[i].att_exp = exp;
+	party[i].def_exp = exp;
+	party[i].speca_exp = exp;
+	party[i].specd_exp = exp;
+	party[i].speed_exp = exp;
+
+	party[i].needs_init = 1;
+	partyMemberRecalculateStats(m, &party[i]);
+	party[i].needs_init = 0;
+	partyMemberRecalculateStats(m, &party[i]);
+	party[i].hp = party[i].hp_max;
+	party[i].mp = party[i].mp_max;
+
+	return i;
+}
+
+
+int partyMemberCanEquipItem(void *handle, PARTY_ENTRY *member, int item) {
+	/* TODO: Implement */
+
+	return 0;
+}
+
+
+MEMBER_STATS_DIFF partyMemberDiffWhenEquip(void *handle, PARTY_ENTRY *member, int item) {
+	MAIN *m = handle;
+	MEMBER_STATS_DIFF diffa, diffb;
+
+	diffb.att = diffb.def = diffb.speca = diffb.specd = diffb.speed = diffb.hp = diffb.mp = 0;
+	diffa = diffb;
+
+	diffb = partyMemberCalcStats(m, member, -1);
+	diffa = partyMemberCalcStats(m, member, item);
+	diffa.att -= diffb.att, diffa.def -= diffb.def, diffa.speca -= diffb.speca, diffa.specd -= diffb.specd, diffa.speed -= diffb.speed;
+
+	return diffa;
+}
+
+
+void partyToggleEquip(void *handle, PARTY_ENTRY *member, int item_slot) {
+	MAIN *m = handle;
+	int i;
+
+	if (member->inventory[item_slot].equipped == 1)
+		member->inventory[item_slot].equipped = 0;
+	else {
+		for (i = 0; i < m->system.inventory_size; i++) {
+			if (member->inventory[i].equipped == 0)
+				continue;
+			if (1 /* TODO: Implementera kontroll för att ta reda på om ett föremål måste plockas bort först */) {
+				member->inventory[i].equipped = 0;
+				break;
+			}
+		}
+
+		member->inventory[item_slot].equipped = 1;
+	}
+
+	partyMemberRecalculateStats(m, member);
+
+	return;
+}
+
+
+int partyMoveItemsWithinParty(void *handle, PARTY_ENTRY *party, int src, int dst, int itemslot, int amount) {
+	MAIN *m = handle;
+	int toss;
+
+	toss = itemAddToInventory(m, party[dst].inventory, party[src].inventory[itemslot].id, amount);
+	itemTossFromInventory(party[src].inventory, itemslot, toss);
+
+	partyRecalculateStats(m, party);
+
+	return amount - toss;
+}
+

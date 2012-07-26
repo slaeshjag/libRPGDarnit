@@ -179,7 +179,7 @@ int npcSpawn(void *handle, int x, int y, int l, int direction, const char *sprit
 	m->npc.npc[npc].moving = 0;
 
 
-	m->npc.npc[npc].sprite = darnitSpriteLoad(m->darnit, sprite, direction, DARNIT_TILESHEET_FORMAT_RGBA);
+	m->npc.npc[npc].sprite = darnitSpriteLoad(m->darnit, sprite, direction, DARNIT_PFORMAT_RGB5A1);
 	npcTeleport(m, npc, x, y, l);
 	
 	m->npc.npc[npc].used = 1;
