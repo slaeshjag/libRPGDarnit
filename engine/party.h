@@ -92,6 +92,16 @@ typedef struct {
 
 
 int partyInit(void *handle, const char *fname);
+int partyMemberHasThisAbility(void *handle, PARTY_ENTRY *member, int ability);
+void partyMemberAddAbility(void *handle, PARTY_ENTRY *member, int ability);
+MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int itemrep);
+void partyMemberRecalculateStats(void *handle, PARTY_ENTRY *member);
+void partyRecalculateStats(void *handle, PARTY_ENTRY *party);
+int partyAddMember(void *handle, PARTY_ENTRY *party, int id, int exp);
+int partyMemberCanEquipItem(void *handle, PARTY_ENTRY *member, int item);
+MEMBER_STATS_DIFF partyMemberDiffWhenEquip(void *handle, PARTY_ENTRY *member, int item);
+void partyToggleEquip(void *handle, PARTY_ENTRY *member, int item_slot);
+int partyMoveItemsWithinParty(void *handle, PARTY_ENTRY *party, int src, int dst, int itemslot, int amount);
 
 
 #endif

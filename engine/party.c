@@ -331,7 +331,7 @@ int partyMoveItemsWithinParty(void *handle, PARTY_ENTRY *party, int src, int dst
 	int toss;
 
 	toss = itemAddToInventory(m, party[dst].inventory, party[src].inventory[itemslot].id, amount);
-	itemTossFromInventory(party[src].inventory, itemslot, toss);
+	itemTossFromInventory(m, party[src].inventory, party[src].inventory[itemslot].id, itemslot, toss);
 
 	partyRecalculateStats(m, party);
 
