@@ -195,11 +195,16 @@ int itemUseOnPartyMember(void *handle, void *srcp, void *dstp, int item_type) {
 		cont = 1;
 	if ((m->item.item[i].effect == ITEM_DAMAGE) && dst->hp > 0)
 		cont = 1;
-	if ((m->item.item[i].effect == ITEM_REVIVE) && dst->hp == 0)
-		cont = 1;
+	if (m->item.item[i].effect == ITEM_REVIVE) {
+		if (dst->hp == 0)
+			cont = 1;
+		else
+			return -1;
+	}
+
 	if ((1 << (m->item.item[i].effect - ITEM_BITMASK_START)) & dst->status_flags)
 		cont = 1;
-	
+
 	if (cont == 0)
 		return -1;
 	
