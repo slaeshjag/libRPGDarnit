@@ -142,6 +142,24 @@ void partyMemberAddAbility(void *handle, PARTY_ENTRY *member, int ability) {
 }
 
 
+void partyMemberLearnAbilities(void *handle, PARTY_ENTRY *member) {
+	MAIN *m = handle;
+	int i, skel;
+	PARTY_MEMBER_AT *at;
+
+	skel = member->id;
+	for (i = 0; i < m->party.skel[member->id].ats; i++) {
+		at = &m->party.skel[skel].at[i];
+		if (partyMemberHasThisAbility(m, member, at->ability) == 0)
+			continue;
+		else if (member->speca >= at->mareq && member->specd >= at->mdreq && member->speed >= at->agilityreq)
+			partyMemberAddAbility(m, member, at->ability);
+	}
+
+	return;
+}
+
+
 int partyMemberEquipSlotGetFree(void *handle, PARTY_ENTRY *member, int equip_slot) {
 	int i, j, slots;
 	MAIN *m = handle;
