@@ -8,6 +8,19 @@ void *partyLoadFaceTS(void *handle, const char *fname) {
 }
 
 
+void partyEquipSlotParse(void *handle, PARTY_SKEL *skel, const char *slots) {
+	MAIN *m = handle;
+	int i;
+
+	i = darnitUtilStringToIntArray(slots, ",", skel->slot, m->system.equip_slots);
+
+	for (; i < m->system.equip_slots; i++)
+		skel->slot[i] = -1;
+	
+	return;
+}
+
+
 int partyInit(void *handle, const char *fname) {
 	MAIN *m = handle;
 	int i, j, party_skels;
@@ -78,6 +91,9 @@ int partyInit(void *handle, const char *fname) {
 		m->party.skel[i].resist[5] = atoi(darnitStringtableEntryGet(st, "RESIST_6"));
 		m->party.skel[i].resist[6] = atoi(darnitStringtableEntryGet(st, "RESIST_7"));
 		m->party.skel[i].resist[7] = atoi(darnitStringtableEntryGet(st, "RESIST_8"));
+
+		m->party.skel[i].slot = malloc(sizeof(int) * m->system.equip_slots);
+		partyEquipSlotParse(m, &m->party.skel[i], darnitStringtableEntryGet(st, "EQUIP_SLOTS"));
 		
 		m->party.skel[i].ats = atoi(darnitStringtableEntryGet(st, "ABILITY_COUNT"));
 		if ((m->party.skel[i].at = malloc(sizeof(PARTY_MEMBER_AT))) == NULL)
@@ -126,7 +142,52 @@ void partyMemberAddAbility(void *handle, PARTY_ENTRY *member, int ability) {
 }
 
 
+int partyMemberEquipSlotGetFree(void *handle, PARTY_ENTRY *member, int equip_slot) {
+	int i, j, slots;
+	MAIN *m = handle;
+
+	for (i = slots = 0; i < m->system.inventory_size; i++) {
+		if (member->inventory[i].id == -1)
+			break;
+		if (member->inventory[i].equipped == 0)
+			continue;
+		if (m->item.item[member->inventory[i].id].item_class == equip_slot)
+			slots++;
+	}
+
+	for (j = 0; j < m->system.equip_slots; j++) {
+		if (m->party.skel[member->id].slot[j] == equip_slot)
+			slots--;
+		if (slots == -1)
+			return j;
+	}
+
+	return -1;
+}
+
+	
+int partyMemberReclaimEquipSlot(void *handle, PARTY_ENTRY *member, int equip_slot) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->system.inventory_size; i++) {
+		if (member->inventory[i].id == -1)
+			break;
+		if (member->inventory[i].equipped == 0)
+			continue;
+		if (m->item.item[member->inventory[i].id].item_class == equip_slot) {
+			member->inventory[i].equipped = 0;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+
+
 MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int itemrep) {
+	/* Itemrep är inte typnummer, utan platsnummer */
 	MAIN *m = handle;
 	float p;
 	int id, item, i, test, repnottried = 0;
@@ -186,7 +247,10 @@ MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int it
 	
 	if (itemrep != -1) {
 		item = itemrep;
-		/* TODO: Here, we need to check if the item can be equipped */
+		if (partyMemberCanEquipItem(m, member, item) == -1) {
+			fprintf(stderr, "Tried to test equip effects with an item that can't be equipped!\n");
+			return diff;
+		}
 	} else
 		item = -1;
 	
@@ -196,7 +260,13 @@ MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int it
 		test = i;
 		if (member->inventory[i].equipped != -1)
 			continue;
-		if (item != -1);	/* TODO: Check if an item of the same type is already equipped and set test accordingly */
+		if (item != -1 && repnottried == 0) {
+			if (partyMemberEquipSlotGetFree(m, member, m->item.item[member->inventory[item].id].item_class) == -1) {
+				repnottried = 1;
+				test = member->inventory[item].id;
+			}
+		} else
+			test = member->inventory[i].id;
 		
 		att += m->item.item[test].attboost * diff.att;
 		def += m->item.item[test].defboost * diff.def;
@@ -280,9 +350,16 @@ int partyAddMember(void *handle, PARTY_ENTRY *party, int id, int exp) {
 
 
 int partyMemberCanEquipItem(void *handle, PARTY_ENTRY *member, int item) {
-	/* TODO: Implement */
+	MAIN *m = handle;
+	int i, type;
 
-	return 0;
+	type = m->item.item[member->inventory[item].id].item_class;
+
+	for (i = 0; i < m->system.equip_slots; i++) 
+		if (m->party.skel[member->id].slot[i] == type)
+			return 0;
+
+	return -1;
 }
 
 
@@ -303,20 +380,13 @@ MEMBER_STATS_DIFF partyMemberDiffWhenEquip(void *handle, PARTY_ENTRY *member, in
 
 void partyToggleEquip(void *handle, PARTY_ENTRY *member, int item_slot) {
 	MAIN *m = handle;
-	int i;
 
 	if (member->inventory[item_slot].equipped == 1)
 		member->inventory[item_slot].equipped = 0;
 	else {
-		for (i = 0; i < m->system.inventory_size; i++) {
-			if (member->inventory[i].equipped == 0)
-				continue;
-			if (1 /* TODO: Implementera kontroll för att ta reda på om ett föremål måste plockas bort först */) {
-				member->inventory[i].equipped = 0;
-				break;
-			}
-		}
-
+		if (partyMemberEquipSlotGetFree(handle, member, m->item.item[member->inventory[item_slot].id].item_class) == -1)
+			if (partyMemberReclaimEquipSlot(m, member, m->item.item[member->inventory[item_slot].id].item_class) < 0)
+				return;
 		member->inventory[item_slot].equipped = 1;
 	}
 

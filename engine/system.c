@@ -55,6 +55,7 @@ int systemInit(void *handle) {
 	m->system.inventory_size = atoi(darnitStringtableEntryGet(stringtable, "INVENTORY_SIZE"));
 	m->system.magic_cap = atoi(darnitStringtableEntryGet(stringtable, "ABILITY_CAP"));
 	m->system.party_cap = atoi(darnitStringtableEntryGet(stringtable, "PARTY_CAP"));
+	m->system.equip_slots = atoi(darnitStringtableEntryGet(stringtable, "PARTY_EQUIP_SLOTS"));
 
 	if (itemInit(m, darnitStringtableEntryGet(stringtable, "ITEM_DB")) != 0);
 	else if (partyInit(m, darnitStringtableEntryGet(stringtable, "PARTY_DB")) != 0);

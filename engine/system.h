@@ -35,6 +35,7 @@ typedef struct {
 	int			item_h;
 
 	int			inventory_size;
+	int			equip_slots;
 	int			magic_cap;
 	int			party_cap;
 } SYSTEM;

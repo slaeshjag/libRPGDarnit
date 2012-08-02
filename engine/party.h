@@ -50,6 +50,7 @@ typedef struct {
 	int			amp_speed;
 
 	int			resist[8];
+	int			*slot;
 	char			anim_db[32];
 	PARTY_MEMBER_AT		*at;
 	int			ats;
