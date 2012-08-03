@@ -52,6 +52,11 @@ int systemInit(void *handle) {
 		return -1;
 	}
 
+	if ((m->map.mapfile_table = darnitStringtableOpen(darnitStringtableEntryGet(stringtable, "MAPFILE_TABLE"))) == NULL) {
+		fprintf(stderr, "Unable to open map file table %s\n", darnitStringtableEntryGet(stringtable, "MAPFILE_TABLE"));
+		return -1;
+	}
+
 	m->system.inventory_size = atoi(darnitStringtableEntryGet(stringtable, "INVENTORY_SIZE"));
 	m->system.magic_cap = atoi(darnitStringtableEntryGet(stringtable, "ABILITY_CAP"));
 	m->system.party_cap = atoi(darnitStringtableEntryGet(stringtable, "PARTY_CAP"));

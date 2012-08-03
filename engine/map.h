@@ -79,6 +79,7 @@ typedef struct {
 	unsigned int		teleporters;
 	MAP_FILE_TRIGGER	*trigger;
 	unsigned int		triggers;
+	void			*mapfile_table;
 } MAP;
 
 

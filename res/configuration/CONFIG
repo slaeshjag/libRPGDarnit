@@ -23,6 +23,7 @@ ITEM_ICON_TILESET			res/item_icons.png
 UI_FONT					res/dejavu_sans.ttf
 ITEM_DB					bin/items.stz
 PARTY_DB				bin/party.stz
+MAPFILE_TABLE				bin/maps.stz
 
 INVENTORY_SIZE				16
 ABILITY_CAP				16

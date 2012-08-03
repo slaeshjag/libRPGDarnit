@@ -8,6 +8,7 @@ int mapInit(void *handle) {
 	m->map.teleporter = NULL;
 	m->map.trigger = NULL;
 	m->map.layer = NULL;
+	darnitStringtableSectionLoad(m->map.mapfile_table, "INDEX");
 
 	return 0;
 }
@@ -41,13 +42,14 @@ int mapUnload(void *handle) {
 }
 
 
-int mapLoad(void *handle, const char *fname) {
+int mapLoad(void *handle, const char *name) {
 	MAIN *m = handle;
 	MAP_FILE_HEADER *mfh;
 	MAP_FILE_NPC npc;
 	int i, j, k;
 	unsigned int t;
 	FILE *fp;
+	const char *fname = darnitStringtableEntryGet(m->map.mapfile_table, name);
 
 	mapUnload(handle);
 
@@ -152,5 +154,56 @@ int mapLoad(void *handle, const char *fname) {
 }
 
 
+int mapGetTeleporter(void *handle, unsigned int x, unsigned int y, unsigned int l) {
+	MAIN *m = handle;
+	int i;
 
+	for (i = 0; i < m->map.teleporters; i++) 
+		if (m->map.teleporter[i].source_x == x)
+			if (m->map.teleporter[i].source_y == y)
+				if (m->map.teleporter[i].source_layer == l)
+					return i;
+	return -1;
+}
+
+
+void mapDoTeleport(void *handle, int teleporter, int reload) {
+	MAIN *m = handle;
+	int npc = m->player.npc;
+	MAP_FILE_TELEPORTER tel = m->map.teleporter[teleporter];
+
+	if (reload) {
+		m->player.npc = -1;
+		mapLoad(m, tel.target_map);
+		npc = m->player.npc;
+	}
+
+	npcTeleport(m, npc, tel.target_x * m->map.tile_w, tel.target_y * m->map.tile_h, tel.target_layer);
+
+	return;
+}
+
+
+void mapTeleport(void *handle, unsigned int x, unsigned int y, unsigned int l) {
+	MAIN *m = handle;
+	int teleporter;
+
+	x /= m->map.tile_w;
+	y /= m->map.tile_h;
+
+	if ((teleporter = mapGetTeleporter(m, x, y, l)) == -1) {
+		fprintf(stderr, "Teleporter at (%i, %i, %i) does not exist\n", x, y, l);
+		return;
+	}
+
+	if (strstr(m->map.teleporter[teleporter].target_map, "LOCAL") == 0) {
+		mapDoTeleport(m, teleporter, 0);
+		return;
+	}
+	
+	m->var.newstate = STATE_TELEPORTING;
+	m->var.teleporter = teleporter;
+	
+	return;
+}
 //int mapTeleport(void *handle, 

@@ -27,6 +27,8 @@ int partyInit(void *handle, const char *fname) {
 	void *st;
 	char num[7], ability_buf[32];
 
+
+	fprintf(stderr, "INIT: Party... ");
 	if ((st = darnitStringtableOpen(fname)) == NULL) {
 		fprintf(stderr, "Unable to open party-stringtable %s\n", fname);
 		return -1;
@@ -114,6 +116,7 @@ int partyInit(void *handle, const char *fname) {
 	}
 
 	darnitStringtableClose(st);
+	fprintf(stderr, "[OK]\n");
 	return 0;
 }
 
