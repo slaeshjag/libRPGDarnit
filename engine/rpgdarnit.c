@@ -29,9 +29,43 @@ void draw(void *handle) {
 }
 
 
+int state(void *handle) {
+	MAIN *m = handle;
+	
+	if (m->var.state != m->var.newstate) {
+		if (darnitRenderFadeChanging(m->darnit) != 2)
+			darnitRenderFadeIn(m->darnit, m->system.fade_duration, 0, 0, 0);
+		else {
+			stateSet(m);
+			darnitRenderFadeOut(m->darnit, m->system.fade_duration);
+		}
+	}
+
+	switch (m->state) {
+		case STATE_OVERWORLD:
+			npcLoop(m);
+			cameraLoop(m);
+			renderOverworld(m);
+			break;
+		case STATE_INVENTORY:
+			/*inventory(m);*/
+			break;
+		case STATE_TELEPORTING:
+			/* Stubbe, jag har ingen aning om vad det här fallet behöver göra i en huvudslinga */
+			break;
+		default:
+			/* Egentligen borde vi inte ha ett panikfall, men sådana är reglerna med switch()... */
+			break;
+	}
+
+	return 0;
+}
+
+
 int init(void *handle) {
 	MAIN *m = handle;
 
+	m->var.state = m->var.newstate = STATE_OVERWORLD;	/* TODO: Måste fixas när menysystem och allt det där implementeras */
 	if (cameraInit(m) != 0);
 	else if (systemInit(m) != 0);
 	else if (mapInit(m) != 0);
@@ -63,12 +97,11 @@ int rpg_main() {
 
 	for (;;) {
 		loop(m);
-		npcLoop(m);
-		cameraLoop(m);
 
 		darnitRenderBegin();
-		darnitRenderBlendingEnable(m->darnit);
-		draw(m);
+		
+		state(m);
+		
 		darnitRenderEnd();
 		darnitLoop(m->darnit);
 	}

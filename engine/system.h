@@ -15,6 +15,7 @@ typedef struct {
 	int			textbox_pad_v;
 	int			textbox_pad_h;
 
+	int			fade_duration;
 	int			box_selection_w;
 	int			box_selection_h;
 	int			box_selection_text_pad;

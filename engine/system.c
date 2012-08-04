@@ -24,6 +24,7 @@ int systemInit(void *handle) {
 	m->system.box_selection_h = atoi(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_H"));
 	m->system.box_selection_text_pad = atoi(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_TEXT_PAD"));
 	m->system.box_selection_scroll = atoi(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_SCROLL"));
+	m->system.fade_duration = atoi(darnitStringtableEntryGet(stringtable, "FADE_EFFECT_DURATION"));
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_RED"), "%f", &m->system.box_selection_r);
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_GREEN"), "%f", &m->system.box_selection_g);
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_BLUE"), "%f", &m->system.box_selection_b);
