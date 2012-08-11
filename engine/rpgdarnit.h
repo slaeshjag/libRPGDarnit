@@ -20,32 +20,32 @@
 #include "player.h"
 #include "render.h"
 #include "state.h"
+#include "inventory.h"
 
 
 typedef struct {
-	DARNIT_KEYS	buttons;
-	int		state;
-	int		newstate;
-
-	int		teleporter;
+	DARNIT_KEYS		buttons;
+	int			state;
+	int			newstate;
+	
+	int			teleporter;
+	INVENTORY_SCREEN	inventory;
 } VAR;
 
 
 typedef struct {
-	void		*darnit;
-	int		state;
-	int		newstate;
+	void			*darnit;
 
-	CAMERA		cam;
-	MAP		map;
-	NPC		npc;
-	PARTY		party;
-	PLAYER		player;
-	ITEM		item;
-	TEXT_BOX	box;
+	CAMERA			cam;
+	MAP			map;
+	NPC			npc;
+	PARTY			party;
+	PLAYER			player;
+	ITEM			item;
+	TEXT_BOX		box;
 
-	SYSTEM		system;
-	VAR		var;
+	SYSTEM			system;
+	VAR			var;
 } MAIN;
 
 

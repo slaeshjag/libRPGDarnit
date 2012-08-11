@@ -83,11 +83,21 @@ typedef struct {
 } MAP;
 
 
+typedef struct {
+	unsigned int		data;
+	int			w;
+	int			h;
+} MAP_QUICKLOAD;
+
+
 int mapInit(void *handle);
 int mapDrawLayer(void *handle, int layer);
+void mapDoTeleport(void *handle, int teleporter, int reload);
+void mapTeleport(void *handle, unsigned int x, unsigned int y, unsigned int l);
 int mapUnload(void *handle);
 int mapLoad(void *handle, const char *fname);
-
+DARNIT_TILEMAP *mapQuickload(void *handle, const char *fname);
+void *mapQuickloadFree(DARNIT_TILEMAP *tm);
 
 
 #endif

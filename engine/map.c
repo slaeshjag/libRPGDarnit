@@ -206,4 +206,44 @@ void mapTeleport(void *handle, unsigned int x, unsigned int y, unsigned int l) {
 	
 	return;
 }
-//int mapTeleport(void *handle, 
+
+
+DARNIT_TILEMAP *mapQuickload(void *handle, const char *fname) {
+	MAIN *m = handle;
+	DARNIT_TILEMAP *tm;
+	MAP_QUICKLOAD ql;
+	FILE *fp;
+	int i;
+
+	if ((fp = fopen(fname, "rb")) == NULL) {
+		fprintf(stderr, "Unable to load %s\n", fname);
+		return NULL;
+	}
+
+	fseek(fp, 188, SEEK_SET);
+
+	fread(&ql.w, 4, 1, fp);
+	fread(&ql.h, 4, 1, fp);
+
+	ql.w = darnitUtilNtohl(ql.w);
+	ql.h = darnitUtilNtohl(ql.h);
+	tm = darnitRenderTilemapNew(m->darnit, 0, m->system.ts_ui_elements, DARNIT_TILEMAP_DEFAULT_MASK, ql.w, ql.h);
+
+	fseek(fp, 16, SEEK_CUR);
+	
+	for (i = 0; i < ql.w * ql.h; i++) {
+		fread(&tm->data[i], 4, 1, fp);
+		tm->data[i] = darnitUtilNtohl(tm->data[i]);
+	}
+
+	fclose(fp);
+	darnitRenderTilemapRecalculate(tm);
+	return tm;
+}
+
+
+void *mapQuickloadFree(DARNIT_TILEMAP *tm) {
+	darnitRenderTilemapDelete(tm);
+
+	return NULL;
+}

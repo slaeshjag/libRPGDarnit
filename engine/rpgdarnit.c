@@ -41,7 +41,7 @@ int state(void *handle) {
 		}
 	}
 
-	switch (m->state) {
+	switch (m->var.state) {
 		case STATE_OVERWORLD:
 			npcLoop(m);
 			cameraLoop(m);

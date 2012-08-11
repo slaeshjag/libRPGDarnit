@@ -25,8 +25,12 @@ typedef struct {
 	float			box_selection_g;
 	float			box_selection_a;
 
+	int			inv_middle_bar_pos;
+	void			*inv_background;
+
 	int			face_w;
 	int			face_h;
+	int			face_pad_h;
 
 	void			*std_font;
 	int			font_height;

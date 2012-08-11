@@ -30,8 +30,11 @@ int systemInit(void *handle) {
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_BLUE"), "%f", &m->system.box_selection_b);
 	sscanf(darnitStringtableEntryGet(stringtable, "BOX_SELECTION_ALPHA"), "%f", &m->system.box_selection_a);
 
+	m->system.inv_middle_bar_pos = atoi(darnitStringtableEntryGet(stringtable, "INV_MIDDLE_BAR_POS"));
+	
 	m->system.face_w = atoi(darnitStringtableEntryGet(stringtable, "FACE_W"));
 	m->system.face_h = atoi(darnitStringtableEntryGet(stringtable, "FACE_H"));
+	m->system.face_pad_h = atoi(darnitStringtableEntryGet(stringtable, "FACE_SPACE_H"));
 	m->system.font_height = atoi(darnitStringtableEntryGet(stringtable, "FONT_HEIGHT"));
 
 	if ((m->system.ts_ui_elements = darnitRenderTilesheetLoad(m->darnit, darnitStringtableEntryGet(stringtable, "UI_TILESET"), m->system.tile_w, m->system.tile_h, DARNIT_PFORMAT_RGB5A1)) == NULL) {
@@ -39,6 +42,8 @@ int systemInit(void *handle) {
 		return -1;
 	}
 
+	m->system.inv_background = mapQuickload(m, darnitStringtableEntryGet(stringtable, "INV_BACKGROUND"));
+	
 	m->system.item_w = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_W"));
 	m->system.item_h = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_H"));
 	
