@@ -19,17 +19,19 @@ FADE_EFFECT_DURATION			300
 
 INV_MIDDLE_BAR_POS			8
 INV_BACKGROUND				res/inventory_background.ctmb
+INV_STAT_NUMBER_SPACE			100
 
 FACE_W					64
 FACE_H					64
 FACE_SPACE_H				24
-FONT_HEIGHT				25
+FONT_HEIGHT				23
 UI_TILESET				res/ui_elements.png
 ITEM_ICON_TILESET			res/item_icons.png
 UI_FONT					res/dejavu_sans.ttf
 ITEM_DB					bin/items.stz
 PARTY_DB				bin/party.stz
 MAPFILE_TABLE				bin/maps.stz
+LANGUAGE_FILE				bin/lang.stz
 
 INVENTORY_SIZE				16
 ABILITY_CAP				16

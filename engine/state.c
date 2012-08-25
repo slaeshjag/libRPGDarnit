@@ -19,6 +19,7 @@ int stateSet(void *handle) {
 			/* Inget behövs vad jag kan komma på */
 			break;
 		case STATE_INVENTORY:
+			fprintf(stderr, "Setting new inventory state\n");
 			inventorySet(m);
 			break;
 		case STATE_TELEPORTING:

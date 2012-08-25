@@ -27,6 +27,7 @@ typedef struct {
 
 	int			inv_middle_bar_pos;
 	void			*inv_background;
+	int			inv_number_space;
 
 	int			face_w;
 	int			face_h;
@@ -43,6 +44,8 @@ typedef struct {
 	int			equip_slots;
 	int			magic_cap;
 	int			party_cap;
+
+	void			*language;
 } SYSTEM;
 
 

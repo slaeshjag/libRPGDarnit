@@ -238,6 +238,8 @@ DARNIT_TILEMAP *mapQuickload(void *handle, const char *fname) {
 
 	fclose(fp);
 	darnitRenderTilemapRecalculate(tm);
+
+
 	return tm;
 }
 

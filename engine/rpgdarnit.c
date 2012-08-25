@@ -36,6 +36,7 @@ int state(void *handle) {
 		if (darnitRenderFadeChanging(m->darnit) != 2)
 			darnitRenderFadeIn(m->darnit, m->system.fade_duration, 0, 0, 0);
 		else {
+			fprintf(stderr, "Setting new state\n");
 			stateSet(m);
 			darnitRenderFadeOut(m->darnit, m->system.fade_duration);
 		}
@@ -48,7 +49,8 @@ int state(void *handle) {
 			renderOverworld(m);
 			break;
 		case STATE_INVENTORY:
-			/*inventory(m);*/
+			darnitRenderOffset(m->darnit, 0, 0);
+			inventory(m);
 			break;
 		case STATE_TELEPORTING:
 			/* Stubbe, jag har ingen aning om vad det här fallet behöver göra i en huvudslinga */
@@ -65,7 +67,8 @@ int state(void *handle) {
 int init(void *handle) {
 	MAIN *m = handle;
 
-	m->var.state = m->var.newstate = STATE_OVERWORLD;	/* TODO: Måste fixas när menysystem och allt det där implementeras */
+	m->var.state = STATE_DUMMY;
+	m->var.newstate = STATE_INVENTORY;	/* TODO: Måste fixas när menysystem och allt det där implementeras */
 	if (cameraInit(m) != 0);
 	else if (systemInit(m) != 0);
 	else if (mapInit(m) != 0);
@@ -94,6 +97,7 @@ int rpg_main() {
 	textboxActivate(m, "123456789012345678901234567890123456789012345678901234567890", -1, 0, 0, NULL, "Yes\nNo\nMaybe");
 	darnitRenderBlendingEnable(m->darnit);
 	cameraFollowNPC(m, 0);
+	partyAddMember(m, m->party.member, 0, 400);
 
 	for (;;) {
 		loop(m);

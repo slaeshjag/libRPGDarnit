@@ -50,6 +50,14 @@ int partyInit(void *handle, const char *fname) {
 		return -1;
 	}
 
+	m->party.member = malloc(sizeof(PARTY_ENTRY) * m->system.party_cap);
+	m->party.members = 0;
+	for (i = 0; i < m->system.party_cap; i++) {
+		m->party.member[i].inventory = malloc(sizeof(ITEM_ENTRY) * m->system.inventory_size);
+		m->party.member[i].magic = malloc(sizeof(int) * m->system.magic_cap);
+		m->party.member[i].id = -1;
+	}
+
 	m->party.skels = party_skels;
 
 	for (i = 0; i < party_skels; i++) {
@@ -279,6 +287,8 @@ MEMBER_STATS_DIFF partyMemberCalcStats(void *handle, PARTY_ENTRY *member, int it
 
 	for (i = 0; i < m->system.inventory_size; i++) {
 		test = i;
+		if (member->inventory[i].id == -1)
+			break;
 		if (member->inventory[i].equipped != -1)
 			continue;
 		if (item != -1 && repnottried == 0) {
@@ -347,9 +357,13 @@ int partyAddMember(void *handle, PARTY_ENTRY *party, int id, int exp) {
 	for (i = 0; i < m->system.party_cap; i++)
 		if (party[i].id == -1)
 			break;
-	if (i == m->system.party_cap)
+	if (i == m->system.party_cap) {
+		fprintf(stderr, "Party's full!\n");
 		return -1;
+	}
 	for (j = 0; j < m->system.inventory_size; j++)
+		party[i].inventory[j].id = -1;
+	for (j = 0; j < m->system.magic_cap; j++)
 		party[i].magic[j] = -1;
 	
 	party[i].id = id;	
@@ -365,6 +379,8 @@ int partyAddMember(void *handle, PARTY_ENTRY *party, int id, int exp) {
 	partyMemberRecalculateStats(m, &party[i]);
 	party[i].hp = party[i].hp_max;
 	party[i].mp = party[i].mp_max;
+
+	fprintf(stderr, "Member added to %i\n", i);
 
 	return i;
 }

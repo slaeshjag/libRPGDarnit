@@ -40,6 +40,7 @@ typedef struct {
 } INVENTORY_SCREEN;
 
 
+int inventory(void *handle);
 void inventorySet(void *handle);
 void inventoryUnset(void *handle);
 

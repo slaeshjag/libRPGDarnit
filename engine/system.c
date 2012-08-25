@@ -11,7 +11,11 @@ int systemInit(void *handle) {
 	}
 
 	darnitStringtableSectionLoad(stringtable, "CONFIG");
-	
+
+	m->system.language = darnitStringtableOpen(darnitStringtableEntryGet(stringtable, "LANGUAGE_FILE"));
+	darnitStringtableSectionLoad(m->system.language, "EN"); /* TODO: Fixa */
+
+
 	m->system.default_text_speed = atoi(darnitStringtableEntryGet(stringtable, "DEFAULT_TEXT_SPEED"));
 	m->system.tile_w = atoi(darnitStringtableEntryGet(stringtable, "TILE_W"));
 	m->system.tile_h = atoi(darnitStringtableEntryGet(stringtable, "TILE_H"));
@@ -43,6 +47,7 @@ int systemInit(void *handle) {
 	}
 
 	m->system.inv_background = mapQuickload(m, darnitStringtableEntryGet(stringtable, "INV_BACKGROUND"));
+	m->system.inv_number_space = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_NUMBER_SPACE"));
 	
 	m->system.item_w = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_W"));
 	m->system.item_h = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_H"));
@@ -74,6 +79,7 @@ int systemInit(void *handle) {
 		darnitStringtableClose(stringtable);
 		return 0;
 	}
+
 
 	darnitStringtableClose(stringtable);
 	return -1;
