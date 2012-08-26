@@ -69,6 +69,7 @@ int init(void *handle) {
 
 	m->var.state = STATE_DUMMY;
 	m->var.newstate = STATE_INVENTORY;	/* TODO: Måste fixas när menysystem och allt det där implementeras */
+//	m->var.newstate = STATE_OVERWORLD;
 	if (cameraInit(m) != 0);
 	else if (systemInit(m) != 0);
 	else if (mapInit(m) != 0);
@@ -98,6 +99,7 @@ int rpg_main() {
 	darnitRenderBlendingEnable(m->darnit);
 	cameraFollowNPC(m, 0);
 	partyAddMember(m, m->party.member, 0, 400);
+	partyAddMember(m, m->party.member, 0, 500000);
 
 	for (;;) {
 		loop(m);

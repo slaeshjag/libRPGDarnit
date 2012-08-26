@@ -3,6 +3,7 @@
 
 
 typedef struct {
+	int				id;
 	void				*stats_text;
 	void				*face_cache;
 } INVENTORY_MEMBER_STATS;
