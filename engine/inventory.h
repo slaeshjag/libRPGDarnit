@@ -1,6 +1,14 @@
 #ifndef __INVENTORY_H__
 #define	__INVENTORY_H__
 
+#define			INVENTORY_MODE_MASK			0x7
+#define			INVENTORY_MODE_SELECT			0x0
+#define			INVENTORY_MODE_STATS			0x1
+#define			INVENTORY_MODE_ITEMS			0x2
+#define			INVENTORY_MODE_MAGIC			0x3
+#define			INVENTORY_MODE_SAVE			0x4
+#define			INVENTORY_MODE_QUIT			0x5
+
 
 typedef struct {
 	int				id;
@@ -18,6 +26,7 @@ typedef struct {
 	void				*main_menu;
 	void				*bottom_menu;
 	void				*bottom_sel_count_menu;
+	void				*mainscreen_icons;
 
 	void				*mainscreen;
 	void				*bottom_navbar;

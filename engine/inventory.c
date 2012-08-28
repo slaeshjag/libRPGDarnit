@@ -1,7 +1,106 @@
 #include "rpgdarnit.h"
 
 
+void inventoryModeSelect(void *handle) {
+	MAIN *m = handle;
+	int ret;
+
+	if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.top_menu)) == -1)
+		return;
+
+	ret++;
+	if (ret == -1)
+		ret = 0;
+	m->var.inventory.mode = ret;
+
+	switch (ret) {
+		case INVENTORY_MODE_SELECT:
+			m->var.newstate = STATE_OVERWORLD;
+			break;
+		case INVENTORY_MODE_STATS:
+			darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
+			darnitTextSurfaceStringAppend(m->var.inventory.mainscreen, "Hellå wörld");
+			break;
+		default:
+			m->var.inventory.mode = INVENTORY_MODE_SELECT;
+			darnitMenuSelectionWaitForNew(m->var.inventory.top_menu);
+			break;
+
+
+	}
+
+
+	return;
+}
+
+void inventoryModeStats(void *handle) {
+	MAIN *m = handle;
+	int ret;
+
+	darnitMenuHandle(m->darnit, m->var.inventory.top_menu);
+
+	if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.member_menu)) == -1)
+		return;
+	
+	if (ret == -2) {
+		m->var.inventory.mode = INVENTORY_MODE_SELECT;
+		darnitMenuSelectionWaitForNew(m->var.inventory.top_menu);
+	} else
+		darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
+	
+
+
+	return;
+}
+
+void inventoryModeItems(void *handle) {
+	return;
+}
+
+void inventoryModeMagic(void *handle) {
+	return;
+}
+
+void inventoryModeSave(void *handle) {
+	return;
+}
+
+void inventoryModeQuit(void *handle) {
+	return;
+}
+
+void inventoryModeBad(void *handle) {
+	return;
+}
+
+
+
 void inventoryMenuLogic(void *handle) {
+	MAIN *m = handle;
+
+	switch (m->var.inventory.mode & INVENTORY_MODE_MASK) {
+		case INVENTORY_MODE_SELECT:
+			inventoryModeSelect(m);
+			break;
+		case INVENTORY_MODE_STATS:
+			inventoryModeStats(m);
+			break;
+		case INVENTORY_MODE_ITEMS:
+			inventoryModeItems(m);
+			break;
+		case INVENTORY_MODE_MAGIC:
+			inventoryModeMagic(m);
+			break;
+		case INVENTORY_MODE_SAVE:
+			inventoryModeSave(m);
+			break;
+		case INVENTORY_MODE_QUIT:
+			inventoryModeQuit(m);
+			break;
+		default:
+			inventoryModeBad(m);
+	}
+
 	return;
 }
 
@@ -109,7 +208,20 @@ void inventorySet(void *handle) {
 
 	ts = m->system.ts_ui_elements;
 	
-	m->var.inventory.mainscreen = NULL;
+	/* Text etc. som ska visas förutom menyer */
+	m->var.inventory.mainscreen_icons = NULL;
+	x = m->system.inv_middle_bar_pos * m->system.tile_w + m->system.textbox_pad_h;
+	y = m->system.tile_h + (m->system.tile_h >> 1);
+	m->var.inventory.mainscreen = darnitTextSurfaceAlloc(m->system.std_font, 1024, m->cam.screen_w, x, y);
+	m->var.inventory.bottom_navbar = NULL;
+	m->var.inventory.info_bar = NULL;
+	m->var.inventory.coins_str = NULL;
+
+	/* Faktiska menyer som måste vara initierade med något då dessa frigörs typ hela tiden */
+	m->var.inventory.bottom_menu = NULL;
+	m->var.inventory.bottom_sel_count_menu = NULL;
+	m->var.inventory.main_menu = NULL;
+
 
 	inventoryStatSet(m);
 
@@ -137,18 +249,23 @@ int inventory(void *handle) {
 	int i;
 
 	darnitRenderTilemap(m->darnit, m->system.inv_background);
-//	darnitMenuHandle(m->darnit, m->var.inventory.member_menu);
 
 	darnitRenderBlendingEnable(m->darnit);
-	darnitMenuHandle(m->darnit, m->var.inventory.top_menu);
+	inventoryMenuLogic(m);
 
 	for (i = 0; i < m->var.inventory.stats; i++) {
 		if (m->var.inventory.stat[i].id == -1)
 			break;
 		darnitRenderTileDraw(m->var.inventory.stat[i].face_cache, m->party.party_face_ts, 1);
 		darnitTextSurfaceDraw(m->var.inventory.stat[i].stats_text);
-
 	}
+
+	/* Rendera all text nu när menyerna är renderade */
+	darnitTextSurfaceDraw(m->var.inventory.mainscreen);
+	darnitTextSurfaceDraw(m->var.inventory.bottom_navbar);
+	darnitTextSurfaceDraw(m->var.inventory.info_bar);
+	darnitTextSurfaceDraw(m->var.inventory.coins_str);
+
 	darnitRenderBlendingDisable(m->darnit);
 
 
