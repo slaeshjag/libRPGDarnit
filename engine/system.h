@@ -28,6 +28,7 @@ typedef struct {
 	int			inv_middle_bar_pos;
 	void			*inv_background;
 	int			inv_number_space;
+	int			inv_number_pos;
 
 	int			face_w;
 	int			face_h;

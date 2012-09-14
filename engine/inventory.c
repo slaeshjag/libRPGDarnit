@@ -19,7 +19,6 @@ void inventoryModeSelect(void *handle) {
 			break;
 		case INVENTORY_MODE_STATS:
 			darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
-			darnitTextSurfaceStringAppend(m->var.inventory.mainscreen, "Hellå wörld");
 			break;
 		default:
 			m->var.inventory.mode = INVENTORY_MODE_SELECT;
@@ -35,9 +34,47 @@ void inventoryModeSelect(void *handle) {
 
 void inventoryModeStats(void *handle) {
 	MAIN *m = handle;
+	void *mainscreen = m->var.inventory.mainscreen;
+	char num[9];
 	int ret;
 
 	darnitMenuHandle(m->darnit, m->var.inventory.top_menu);
+
+	if (darnitMenuChangedCheck(m->var.inventory.member_menu)) {
+		m->var.inventory.member_sel = darnitMenuPeek(m->var.inventory.member_menu, NULL);
+		/* Okej, det här blir fult, men jag är osäker på hur jag annars ska göra det :< */
+		darnitTextSurfaceReset(mainscreen);
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "INVENTORY_STATS_FOR"));
+		darnitTextSurfaceStringAppend(mainscreen, m->party.skel[m->party.member[m->var.inventory.member_sel].id].name);
+		darnitTextSurfaceStringAppend(mainscreen, "\n\n");
+
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "ATTACK"));
+		darnitTextSurfaceXposSet(mainscreen, m->system.inv_number_pos);
+		sprintf(num, "%i\n", m->party.member[m->var.inventory.member_sel].att);
+		darnitTextSurfaceStringAppend(mainscreen, num);
+
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "DEFENSE"));
+		darnitTextSurfaceXposSet(mainscreen, m->system.inv_number_pos);
+		sprintf(num, "%i\n", m->party.member[m->var.inventory.member_sel].def);
+		darnitTextSurfaceStringAppend(mainscreen, num);
+
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "SPEC_ATTACK"));
+		darnitTextSurfaceXposSet(mainscreen, m->system.inv_number_pos);
+		sprintf(num, "%i\n", m->party.member[m->var.inventory.member_sel].speca);
+		darnitTextSurfaceStringAppend(mainscreen, num);
+
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "SPEC_DEFENCE"));
+		darnitTextSurfaceXposSet(mainscreen, m->system.inv_number_pos);
+		sprintf(num, "%i\n", m->party.member[m->var.inventory.member_sel].specd);
+		darnitTextSurfaceStringAppend(mainscreen, num);
+
+		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "AGILITY"));
+		darnitTextSurfaceXposSet(mainscreen, m->system.inv_number_pos);
+		sprintf(num, "%i\n", m->party.member[m->var.inventory.member_sel].speed);
+		darnitTextSurfaceStringAppend(mainscreen, num);
+	}
+
+		
 
 	if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.member_menu)) == -1)
 		return;

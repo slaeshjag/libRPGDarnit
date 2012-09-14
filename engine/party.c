@@ -72,25 +72,25 @@ int partyInit(void *handle, const char *fname) {
 		m->party.skel[i].base_HP = atoi(darnitStringtableEntryGet(st, "BASE_HP"));
 		m->party.skel[i].base_MP = atoi(darnitStringtableEntryGet(st, "BASE_MP"));
 		m->party.skel[i].base_att = atoi(darnitStringtableEntryGet(st, "BASE_ATTACK"));
-		m->party.skel[i].base_def = atoi(darnitStringtableEntryGet(st, "BASE_DEFENCE"));
+		m->party.skel[i].base_def = atoi(darnitStringtableEntryGet(st, "BASE_DEFENSE"));
 		m->party.skel[i].base_speca = atoi(darnitStringtableEntryGet(st, "BASE_SPEC_ATTACK"));
-		m->party.skel[i].base_specd = atoi(darnitStringtableEntryGet(st, "BASE_SPEC_DEFENCE"));
+		m->party.skel[i].base_specd = atoi(darnitStringtableEntryGet(st, "BASE_SPEC_DEFENSE"));
 		m->party.skel[i].base_speed = atoi(darnitStringtableEntryGet(st, "BASE_SPEED"));
 
 		m->party.skel[i].per_HP = atoi(darnitStringtableEntryGet(st, "PERIOD_HP"));
 		m->party.skel[i].per_MP = atoi(darnitStringtableEntryGet(st, "PERIOD_MP"));
 		m->party.skel[i].per_att = atoi(darnitStringtableEntryGet(st, "PERIOD_ATTACK"));
-		m->party.skel[i].per_def = atoi(darnitStringtableEntryGet(st, "PERIOD_DEFENCE"));
+		m->party.skel[i].per_def = atoi(darnitStringtableEntryGet(st, "PERIOD_DEFENSE"));
 		m->party.skel[i].per_speca = atoi(darnitStringtableEntryGet(st, "PERIOD_SPEC_ATTACK"));
-		m->party.skel[i].per_specd = atoi(darnitStringtableEntryGet(st, "PERIOD_SPEC_DEFENCE"));
+		m->party.skel[i].per_specd = atoi(darnitStringtableEntryGet(st, "PERIOD_SPEC_DEFENSE"));
 		m->party.skel[i].per_speed = atoi(darnitStringtableEntryGet(st, "PERIOD_SPEED"));
 
 		m->party.skel[i].amp_HP = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_HP"));
 		m->party.skel[i].amp_MP = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_MP"));
 		m->party.skel[i].amp_att = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_ATTACK"));
-		m->party.skel[i].amp_def = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_DEFENCE"));
+		m->party.skel[i].amp_def = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_DEFENSE"));
 		m->party.skel[i].amp_speca = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_SPEC_ATTACK"));
-		m->party.skel[i].amp_specd = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_SPEC_DEFENCE"));
+		m->party.skel[i].amp_specd = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_SPEC_DEFENSE"));
 		m->party.skel[i].amp_speed = atoi(darnitStringtableEntryGet(st, "AMPLITUDE_SPEED"));
 		
 		m->party.skel[i].resist[0] = atoi(darnitStringtableEntryGet(st, "RESIST_1"));

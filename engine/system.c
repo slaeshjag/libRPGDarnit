@@ -48,6 +48,7 @@ int systemInit(void *handle) {
 
 	m->system.inv_background = mapQuickload(m, darnitStringtableEntryGet(stringtable, "INV_BACKGROUND"));
 	m->system.inv_number_space = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_NUMBER_SPACE"));
+	m->system.inv_number_pos = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_STAT_NUMBER_POS"));
 	
 	m->system.item_w = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_W"));
 	m->system.item_h = atoi(darnitStringtableEntryGet(stringtable, "ITEM_ICON_H"));
