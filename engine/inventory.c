@@ -44,6 +44,7 @@ void inventoryModeStats(void *handle) {
 	
 	if (ret == -2) {
 		m->var.inventory.mode = INVENTORY_MODE_SELECT;
+		darnitTextSurfaceReset(m->var.inventory.mainscreen);
 		darnitMenuSelectionWaitForNew(m->var.inventory.top_menu);
 	} else
 		darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
