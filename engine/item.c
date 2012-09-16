@@ -30,6 +30,7 @@ int itemInit(void *handle, const char *fname) {
 		sprintf(num, "%i", i);
 		darnitStringtableSectionLoad(st, num);
 		m->item.item[i].item_class = atoi(darnitStringtableEntryGet(st, "CLASS"));
+		m->item.item[i].max_stack = atoi(darnitStringtableEntryGet(st, "MAX_STACK"));
 		m->item.item[i].effect = atoi(darnitStringtableEntryGet(st, darnitStringtableEntryGet(st, "EFFECT")));
 		m->item.item[i].hp = atoi(darnitStringtableEntryGet(st, "HP"));
 		m->item.item[i].hpbyuse = atoi(darnitStringtableEntryGet(st, "HP_BY_USE"));
@@ -67,6 +68,17 @@ int itemInit(void *handle, const char *fname) {
 }
 
 
+int itemItemsInInventory(void *handle, ITEM_ENTRY *item) {
+	MAIN *m = handle;
+	int i;
+
+	for (i = 0; i < m->system.inventory_size; i++)
+		if (item[i].id == -1)
+			return i;
+	return i;
+}
+
+
 int itemGiveToParty(void *handle, unsigned int item, unsigned int amount) {
 	MAIN *m = handle;
 	int i, j;
@@ -77,7 +89,7 @@ int itemGiveToParty(void *handle, unsigned int item, unsigned int amount) {
 		for (j = 0; j < m->system.inventory_size; j++) {
 			if (m->party.member[i].inventory[j].id == item) {
 				if (m->party.member[i].inventory[j].amount + amount > m->item.item[item].max_stack) {
-					amount -= (m->item.item[item].max_stack - m->party.member[i].inventory[i].amount);
+					amount -= (m->item.item[item].max_stack - m->party.member[i].inventory[j].amount);
 					m->party.member[i].inventory[j].amount = m->item.item[item].max_stack;
 					continue;
 				}

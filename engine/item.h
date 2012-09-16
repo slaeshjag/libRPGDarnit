@@ -50,6 +50,7 @@ typedef struct {
 
 
 int itemInit(void *handle, const char *fname);
+int itemItemsInInventory(void *handle, ITEM_ENTRY *item);
 int itemGiveToParty(void *handle, unsigned int item, unsigned int amount);
 void itemDeleteFromInventory(void *handle, ITEM_ENTRY *item, int item_slot);
 void itemTossFromInventory(void *handle, ITEM_ENTRY *item, int item_type, int slot, int amount);

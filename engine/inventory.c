@@ -18,6 +18,7 @@ void inventoryModeSelect(void *handle) {
 			m->var.newstate = STATE_OVERWORLD;
 			break;
 		case INVENTORY_MODE_STATS:
+		case INVENTORY_MODE_ITEMS:
 			darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
 			break;
 		default:
@@ -43,6 +44,7 @@ void inventoryModeStats(void *handle) {
 	if (darnitMenuChangedCheck(m->var.inventory.member_menu)) {
 		m->var.inventory.member_sel = darnitMenuPeek(m->var.inventory.member_menu, NULL);
 		/* Okej, det här blir fult, men jag är osäker på hur jag annars ska göra det :< */
+
 		darnitTextSurfaceReset(mainscreen);
 		darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "INVENTORY_STATS_FOR"));
 		darnitTextSurfaceStringAppend(mainscreen, m->party.skel[m->party.member[m->var.inventory.member_sel].id].name);
@@ -92,6 +94,72 @@ void inventoryModeStats(void *handle) {
 }
 
 void inventoryModeItems(void *handle) {
+	MAIN *m = handle;
+	void *mainscreen = m->var.inventory.mainscreen;
+	int ret, i, items, item, x, y, w, h, main_top_sel;
+	char num[9];
+
+	darnitMenuHandle(m->darnit, m->var.inventory.top_menu);
+	
+	if (darnitMenuChangedCheck(m->var.inventory.member_menu) || darnitMenuChangedCheck(m->var.inventory.main_menu)) {
+		m->var.inventory.member_sel = darnitMenuPeek(m->var.inventory.member_menu, NULL);
+		if (m->var.inventory.main_menu)
+			m->var.inventory.main_sel = darnitMenuPeek(m->var.inventory.main_menu, &main_top_sel);
+		else
+			main_top_sel = m->var.inventory.main_sel = 0;
+
+		/* Ugh. */
+
+		darnitTextSurfaceReset(mainscreen);
+		items = itemItemsInInventory(handle, m->party.member[m->var.inventory.member_sel].inventory);
+		for (i = main_top_sel; i < m->system.inv_mainscreen_rows + main_top_sel; i++) {
+			if (i >= items)
+				break;
+			darnitTextSurfaceSkip(mainscreen, m->system.inv_item_text_skip);
+			item = m->party.member[m->var.inventory.member_sel].inventory[i].id;
+			darnitTextSurfaceStringAppend(mainscreen, m->item.item[item].name);
+			darnitTextSurfaceXposSet(mainscreen, m->system.inv_item_number_pos);
+			darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "AMOUNT_SYMBOL"));
+			sprintf(num, "%.2i", m->party.member[m->var.inventory.member_sel].inventory[i].amount);
+			darnitTextSurfaceStringAppend(mainscreen, num);
+			darnitTextSurfaceStringAppend(mainscreen, "\n");
+		}
+	}
+
+	if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.member_menu)) == -1)
+		return;
+	if (ret == -2) {
+		m->var.inventory.mode = INVENTORY_MODE_SELECT;
+		darnitTextSurfaceReset(m->var.inventory.mainscreen);
+		darnitMenuSelectionWaitForNew(m->var.inventory.top_menu);
+		m->var.inventory.main_menu = darnitMenuDestroy(m->var.inventory.main_menu);
+		return;
+	} else {
+		if (m->var.inventory.main_menu == NULL) {
+			items = itemItemsInInventory(handle, m->party.member[m->var.inventory.member_sel].inventory);
+
+			if (items <= 0) {
+				darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
+				return;
+			}
+
+			x = m->system.inv_middle_bar_pos * m->system.tile_w + m->system.textbox_pad_h;
+			y = m->system.tile_h + (m->system.tile_h >> 1);
+			w = m->cam.screen_w - x - m->system.textbox_pad_h;
+			h = darnitFontGetGlyphHS(m->system.std_font);
+			m->var.inventory.main_menu = darnitMenuVerticalShadeCreate(m->darnit, x, y, w, h, h, items, -1, m->system.inv_mainscreen_rows);
+			fprintf(stderr, "Max H: %i, Items: %i\n", m->system.inv_mainscreen_rows, items);
+		} else {
+			if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.main_menu)) == -1)
+				return;
+			else if (ret == -2) {
+				m->var.inventory.main_menu = darnitMenuDestroy(m->var.inventory.main_menu);
+				darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
+			}
+		}
+	}
+
+
 	return;
 }
 
@@ -229,7 +297,6 @@ void inventorySet(void *handle) {
 		darnitRenderTileMove(m->var.inventory.stat[i].face_cache, 0, ts, m->system.textbox_pad_h, y + i * sel_h + pad_2_y);
 	}
 
-	fprintf(stderr, "Adding menu with %i members\n", m->party.members);
 	x -= m->system.textbox_pad_h;
 	x -= m->system.face_w;
 	h = sel_h - m->system.face_pad_h;
@@ -259,6 +326,8 @@ void inventorySet(void *handle) {
 	m->var.inventory.bottom_menu = NULL;
 	m->var.inventory.bottom_sel_count_menu = NULL;
 	m->var.inventory.main_menu = NULL;
+	m->var.inventory.top_sel = m->var.inventory.member_sel = m->var.inventory.member_target_sel = 0;
+	m->var.inventory.main_sel = m->var.inventory.sel_count = m->var.inventory.bottom_sel_count = 0;
 
 
 	inventoryStatSet(m);
@@ -277,6 +346,17 @@ void inventoryUnset(void *handle) {
 	}
 
 	free(m->var.inventory.stat);
+	darnitTextSurfaceFree(m->var.inventory.mainscreen);
+	darnitTextSurfaceFree(m->var.inventory.bottom_navbar);
+	darnitTextSurfaceFree(m->var.inventory.info_bar);
+	darnitTextSurfaceFree(m->var.inventory.coins_str);
+
+	m->var.inventory.top_menu = darnitMenuDestroy(m->var.inventory.top_menu);
+	m->var.inventory.member_menu = darnitMenuDestroy(m->var.inventory.member_menu);
+	m->var.inventory.main_menu = darnitMenuDestroy(m->var.inventory.main_menu);
+	m->var.inventory.bottom_menu = darnitMenuDestroy(m->var.inventory.bottom_menu);
+	m->var.inventory.bottom_sel_count_menu = darnitMenuDestroy(m->var.inventory.bottom_sel_count_menu);
+
 
 	return;
 }

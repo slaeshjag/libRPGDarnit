@@ -83,6 +83,7 @@ int init(void *handle) {
 
 int rpg_main() {
 	MAIN *m;
+	int i;
 
 	if ((m = malloc(sizeof(MAIN))) == NULL) {
 		fprintf(stderr, "Error: Unable to allocate memory for the main struct!\n");
@@ -100,6 +101,10 @@ int rpg_main() {
 	cameraFollowNPC(m, 0);
 	partyAddMember(m, m->party.member, 0, 400);
 	partyAddMember(m, m->party.member, 0, 500000);
+	for (i = 0; i < 30; i++) {
+		itemGiveToParty(m, 0, 1);
+		itemGiveToParty(m, 1, 1);
+	}
 
 	for (;;) {
 		loop(m);
