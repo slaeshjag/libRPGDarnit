@@ -48,6 +48,7 @@ int systemInit(void *handle) {
 
 	m->system.inv_background = mapQuickload(m, darnitStringtableEntryGet(stringtable, "INV_BACKGROUND"));
 	m->system.inv_mainscreen_rows = atoi(darnitStringtableEntryGet(stringtable, "INV_MAINSCREEN_ROWS"));
+	m->system.inv_stat_w = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_W"));
 	m->system.inv_number_space = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_NUMBER_SPACE"));
 	m->system.inv_number_pos = atoi(darnitStringtableEntryGet(stringtable, "INV_STAT_STAT_NUMBER_POS"));
 	m->system.inv_item_text_skip = atoi(darnitStringtableEntryGet(stringtable, "INV_ITEM_TEXT_SKIP"));

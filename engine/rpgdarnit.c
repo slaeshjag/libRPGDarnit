@@ -99,12 +99,16 @@ int rpg_main() {
 	textboxActivate(m, "123456789012345678901234567890123456789012345678901234567890", -1, 0, 0, NULL, "Yes\nNo\nMaybe");
 	darnitRenderBlendingEnable(m->darnit);
 	cameraFollowNPC(m, 0);
+
+	/* Temporary, this will be replaced with gameInit() or something */
+	m->party.coins = 1234;
 	partyAddMember(m, m->party.member, 0, 400);
 	partyAddMember(m, m->party.member, 0, 500000);
-	for (i = 0; i < 30; i++) {
+	for (i = 0; i < 15; i++) {
 		itemGiveToParty(m, 0, 1);
 		itemGiveToParty(m, 1, 1);
 	}
+
 
 	for (;;) {
 		loop(m);

@@ -28,6 +28,7 @@ typedef struct {
 	int			inv_middle_bar_pos;
 	void			*inv_background;
 	int			inv_mainscreen_rows;
+	int			inv_stat_w;
 	int			inv_number_space;
 	int			inv_number_pos;
 	int			inv_item_text_skip;

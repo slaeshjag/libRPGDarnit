@@ -46,8 +46,8 @@ int itemInit(void *handle, const char *fname) {
 		m->item.item[i].animation[31] = 0;
 		strncpy(m->item.item[i].name, darnitStringtableEntryGet(st, "NAME"), 31);
 		m->item.item[i].animation[31] = 0;
-		strncpy(m->item.item[i].descr, darnitStringtableEntryGet(st, "DESCRIPTION"), 31);
-		m->item.item[i].animation[31] = 0;
+		strncpy(m->item.item[i].descr, darnitStringtableEntryGet(st, "DESCRIPTION"), 64);
+		m->item.item[i].animation[63] = 0;
 
 		sscanf(darnitStringtableEntryGet(st, "ATTACK_BOOST"), "%f", &m->item.item[i].attboost);
 		sscanf(darnitStringtableEntryGet(st, "DEFENCE_BOOST"), "%f", &m->item.item[i].defboost);

@@ -101,14 +101,14 @@ void inventoryModeItems(void *handle) {
 
 	darnitMenuHandle(m->darnit, m->var.inventory.top_menu);
 	
+	/* Ugh. */
+	
 	if (darnitMenuChangedCheck(m->var.inventory.member_menu) || darnitMenuChangedCheck(m->var.inventory.main_menu)) {
 		m->var.inventory.member_sel = darnitMenuPeek(m->var.inventory.member_menu, NULL);
 		if (m->var.inventory.main_menu)
 			m->var.inventory.main_sel = darnitMenuPeek(m->var.inventory.main_menu, &main_top_sel);
 		else
 			main_top_sel = m->var.inventory.main_sel = 0;
-
-		/* Ugh. */
 
 		darnitTextSurfaceReset(mainscreen);
 		items = itemItemsInInventory(handle, m->party.member[m->var.inventory.member_sel].inventory);
@@ -118,11 +118,23 @@ void inventoryModeItems(void *handle) {
 			darnitTextSurfaceSkip(mainscreen, m->system.inv_item_text_skip);
 			item = m->party.member[m->var.inventory.member_sel].inventory[i].id;
 			darnitTextSurfaceStringAppend(mainscreen, m->item.item[item].name);
-			darnitTextSurfaceXposSet(mainscreen, m->system.inv_item_number_pos);
-			darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "AMOUNT_SYMBOL"));
-			sprintf(num, "%.2i", m->party.member[m->var.inventory.member_sel].inventory[i].amount);
-			darnitTextSurfaceStringAppend(mainscreen, num);
+			if (m->item.item[item].max_stack > 1) {
+				darnitTextSurfaceXposSet(mainscreen, m->system.inv_item_number_pos);
+				darnitTextSurfaceStringAppend(mainscreen, darnitStringtableEntryGet(m->system.language, "AMOUNT_SYMBOL"));
+				sprintf(num, "%.2i", m->party.member[m->var.inventory.member_sel].inventory[i].amount);
+				darnitTextSurfaceStringAppend(mainscreen, num);
+			}
 			darnitTextSurfaceStringAppend(mainscreen, "\n");
+			darnitRenderTileSet(m->var.inventory.item_icon, i - main_top_sel, m->item.ts_icon, item);
+		}
+
+		for (; i < m->system.inv_mainscreen_rows + main_top_sel; i++)
+			darnitRenderTileSetTilesheetCoord(m->var.inventory.item_icon, i - main_top_sel, m->item.ts_icon, 0, 0, 0, 0);
+
+		if (m->var.inventory.main_menu) {
+			darnitTextSurfaceReset(m->var.inventory.info_bar);
+			item = m->party.member[m->var.inventory.member_sel].inventory[m->var.inventory.main_sel].id;
+			darnitTextSurfaceStringAppend(m->var.inventory.info_bar, m->item.item[item].descr);
 		}
 	}
 
@@ -148,12 +160,12 @@ void inventoryModeItems(void *handle) {
 			w = m->cam.screen_w - x - m->system.textbox_pad_h;
 			h = darnitFontGetGlyphHS(m->system.std_font);
 			m->var.inventory.main_menu = darnitMenuVerticalShadeCreate(m->darnit, x, y, w, h, h, items, -1, m->system.inv_mainscreen_rows);
-			fprintf(stderr, "Max H: %i, Items: %i\n", m->system.inv_mainscreen_rows, items);
 		} else {
 			if ((ret = darnitMenuHandle(m->darnit, m->var.inventory.main_menu)) == -1)
 				return;
 			else if (ret == -2) {
 				m->var.inventory.main_menu = darnitMenuDestroy(m->var.inventory.main_menu);
+				darnitTextSurfaceReset(m->var.inventory.info_bar);
 				darnitMenuSelectionWaitForNew(m->var.inventory.member_menu);
 			}
 		}
@@ -259,7 +271,7 @@ void inventoryStatSet(void *handle) {
 
 void inventorySet(void *handle) {
 	MAIN *m = handle;
-	char num[10];
+	char num[64];
 	int i, x, y, sel_h, pad_2_y, s, t, w, h;
 	void *ts = m->party.party_face_ts;
 
@@ -292,7 +304,7 @@ void inventorySet(void *handle) {
 	pad_2_y = (darnitFontGetGlyphHS(m->system.std_font) * 3 - m->system.face_h) / 2;
 
 	for (i = 0; i < m->var.inventory.stats; i++) {
-		m->var.inventory.stat[i].stats_text = darnitTextSurfaceAlloc(m->system.std_font, 75, 150, x, y + i * sel_h);
+		m->var.inventory.stat[i].stats_text = darnitTextSurfaceAlloc(m->system.std_font, 75, m->system.inv_stat_w, x, y + i * sel_h);
 		m->var.inventory.stat[i].face_cache = darnitRenderTileAlloc(1);
 		darnitRenderTileMove(m->var.inventory.stat[i].face_cache, 0, ts, m->system.textbox_pad_h, y + i * sel_h + pad_2_y);
 	}
@@ -319,8 +331,10 @@ void inventorySet(void *handle) {
 	y = m->system.tile_h + (m->system.tile_h >> 1);
 	m->var.inventory.mainscreen = darnitTextSurfaceAlloc(m->system.std_font, 1024, m->cam.screen_w, x, y);
 	m->var.inventory.bottom_navbar = NULL;
-	m->var.inventory.info_bar = NULL;
-	m->var.inventory.coins_str = NULL;
+
+	y = m->cam.screen_h - m->system.tile_h + ((m->system.tile_h - darnitFontGetGlyphHS(m->system.std_font)) >> 1);
+	m->var.inventory.info_bar = darnitTextSurfaceAlloc(m->system.std_font, 128, m->cam.screen_w, x, y);
+	m->var.inventory.coins_str = darnitTextSurfaceAlloc(m->system.std_font, 128, m->cam.screen_w, m->system.textbox_pad_h, y);
 
 	/* Faktiska menyer som måste vara initierade med något då dessa frigörs typ hela tiden */
 	m->var.inventory.bottom_menu = NULL;
@@ -329,6 +343,20 @@ void inventorySet(void *handle) {
 	m->var.inventory.top_sel = m->var.inventory.member_sel = m->var.inventory.member_target_sel = 0;
 	m->var.inventory.main_sel = m->var.inventory.sel_count = m->var.inventory.bottom_sel_count = 0;
 
+	sprintf(num, "%s: %.8i\n", darnitStringtableEntryGet(m->system.language, "COINS"), m->party.coins);
+	darnitTextSurfaceStringAppend(m->var.inventory.coins_str, num);
+
+	m->var.inventory.mode = INVENTORY_MODE_SELECT;
+	m->var.inventory.item_icon = darnitRenderTileAlloc(m->system.inv_mainscreen_rows);
+
+	x = m->system.inv_middle_bar_pos * m->system.tile_w + m->system.textbox_pad_h;
+	y = m->system.tile_h + (m->system.tile_h >> 1) + (((int)darnitFontGetGlyphHS(m->system.std_font) - m->system.item_h) >> 1);
+
+	for (i = 0; i < m->system.inv_mainscreen_rows; i++) {
+		darnitRenderTileClear(m->var.inventory.item_icon, i);
+		darnitRenderTileMove(m->var.inventory.item_icon, i, m->item.ts_icon, x, y);
+		y += darnitFontGetGlyphHS(m->system.std_font);
+	}
 
 	inventoryStatSet(m);
 
@@ -350,6 +378,8 @@ void inventoryUnset(void *handle) {
 	darnitTextSurfaceFree(m->var.inventory.bottom_navbar);
 	darnitTextSurfaceFree(m->var.inventory.info_bar);
 	darnitTextSurfaceFree(m->var.inventory.coins_str);
+
+	m->var.inventory.item_icon = darnitRenderTileFree(m->var.inventory.item_icon);
 
 	m->var.inventory.top_menu = darnitMenuDestroy(m->var.inventory.top_menu);
 	m->var.inventory.member_menu = darnitMenuDestroy(m->var.inventory.member_menu);
@@ -383,6 +413,7 @@ int inventory(void *handle) {
 	darnitTextSurfaceDraw(m->var.inventory.bottom_navbar);
 	darnitTextSurfaceDraw(m->var.inventory.info_bar);
 	darnitTextSurfaceDraw(m->var.inventory.coins_str);
+	darnitRenderTileDraw(m->var.inventory.item_icon, m->item.ts_icon, m->system.inv_mainscreen_rows);
 
 	darnitRenderBlendingDisable(m->darnit);
 

@@ -124,6 +124,7 @@ int partyInit(void *handle, const char *fname) {
 	}
 
 	darnitStringtableClose(st);
+
 	fprintf(stderr, "[OK]\n");
 	return 0;
 }
